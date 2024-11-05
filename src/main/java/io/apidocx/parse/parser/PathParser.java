@@ -46,7 +46,7 @@ public class PathParser {
         } else {
             PsiAnnotation jsonRpcAnnotation = PsiAnnotationUtils.getAnnotation(Objects.requireNonNull(method.getContainingClass()), JsonRpcConstants.JsonRpcService);
             if (jsonRpcAnnotation != null) {
-                pathInfo = parseJsonRpcServiceAnnotation(HttpMethod.POST, jsonRpcAnnotation);
+                pathInfo = parseJsonRpcServiceAnnotation(HttpMethod.POST, jsonRpcAnnotation, method);
             } else {
                 for (Entry<HttpMethod, String> entry : MAPPINGS.entrySet()) {
                     HttpMethod httpMethod = entry.getKey();
@@ -96,9 +96,17 @@ public class PathParser {
     /**
      * JSONRPC com.googlecode.jsonrpc4j.JsonRpcService
      */
-    private static PathInfo parseJsonRpcServiceAnnotation(HttpMethod method, PsiAnnotation annotation) {
+    private static PathInfo parseJsonRpcServiceAnnotation(HttpMethod method, PsiAnnotation annotation, PsiMethod psiMethod) {
         PathInfo info = new PathInfo();
-        info.setPaths(getPaths(annotation));
+        List<String> paths = getPaths(annotation);
+        if (paths != null && !paths.isEmpty()) {
+            String s = paths.get(0);
+            if (!s.isEmpty()) {
+                s = s + "#" + psiMethod.getName();
+            }
+            paths.set(0, s);
+        }
+        info.setPaths(paths);
         info.setMethod(method);
         return info;
     }
