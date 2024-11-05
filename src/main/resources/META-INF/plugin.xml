@@ -1,22 +1,10 @@
 <idea-plugin>
     <id>yapix</id>
-    <name>Apidocx</name>
-    <vendor url="https://github.com/jetplugins">Jetplugins</vendor>
+    <name>ay2c</name>
+    <vendor url="https://github.com/Seayon/apidocx">ay2c</vendor>
 
     <description><![CDATA[
-        Generate API documents to any place: YApi, RAP2, Eolink, etc.<br>
-        <p>
-            <a href="https://github.com/jetplugins/apidocx">GitHub</a> |
-            <a href="https://github.com/jetplugins/apidocx/issues">Issues</a>
-        </p>
-        <h2>Features</h2>
-        <ul>
-            <li>Generate API documents from Java source code.</li>
-            <li>Upload to YApi, Rap2, Eolink, ShowDoc, Apifox platform.</li>
-            <li>Export to OpenAPI, Markdown, cURL document.</li>
-            <li>Supports popular frameworks Spring MVC, Spring Flux, Jackson, JSR303, and Swagger.</li>
-        </ul>
-        <img src="https://raw.githubusercontent.com/jetplugins/apidocx/main/docs/screenshots.gif" height="360">
+        生成 Api 文档到  YApi
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
@@ -53,24 +41,28 @@
     </extensions>
 
     <actions>
-        <action id="apidocx.MainAction" class="io.apidocx.action.MainAction">
-            <add-to-group group-id="EditorLangPopupMenu" anchor="first"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="alt u"/>
+        <action id="apidocx.YapiUploadAction" class="io.apidocx.handle.yapi.YapiUploadAction">
+            <add-to-group group-id="EditorPopupMenuDebug"/>
         </action>
-        <group id="apidocx.ApidocxActionGroup" class="io.apidocx.action.ApidocxActionGroup" popup="true">
-            <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="apidocx.MainAction"/>
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-            <action id="apidocx.YapiUploadAction" class="io.apidocx.handle.yapi.YapiUploadAction"/>
-            <action id="apidocx.Rap2UploadAction" class="io.apidocx.handle.rap2.Rap2UploadAction"/>
-            <action id="apidocx.EolinkUploadAction" class="io.apidocx.handle.eolink.EolinkUploadAction"/>
-            <action id="apidocx.ApifoxUploadAction" class="io.apidocx.handle.apifox.ApifoxUploadAction"/>
-            <action id="apidocx.ShowdocUploadAction" class="io.apidocx.handle.showdoc.ShowdocUploadAction"/>
-            <action id="apidocx.ExportToMarkdownAction" class="io.apidocx.handle.markdown.ExportToMarkdownAction"/>
-            <action id="apidocx.ExportToOpenApiAction" class="io.apidocx.handle.openapi.ExportToOpenApiAction"/>
-            <action id="apidocx.CopyAsCurlAction" class="io.apidocx.handle.curl.CopyAsCurlAction"/>
-            <action id="apidocx.CopyAsMarkdownAction" class="io.apidocx.handle.markdown.CopyAsMarkdownAction"/>
-            <action id="apidocx.OpenSettings" class="io.apidocx.action.OpenSettingsAction"/>
-        </group>
+        <!--
+                <action id="apidocx.MainAction" class="io.apidocx.action.MainAction">
+                    <add-to-group group-id="EditorLangPopupMenu" anchor="first"/>
+                    <keyboard-shortcut keymap="$default" first-keystroke="alt u"/>
+                </action>
+                <group id="apidocx.ApidocxActionGroup" class="io.apidocx.action.ApidocxActionGroup" popup="true">
+                    <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="apidocx.MainAction"/>
+                    <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+                    <action id="apidocx.YapiUploadAction" class="io.apidocx.handle.yapi.YapiUploadAction"/>
+                    <action id="apidocx.Rap2UploadAction" class="io.apidocx.handle.rap2.Rap2UploadAction"/>
+                    <action id="apidocx.EolinkUploadAction" class="io.apidocx.handle.eolink.EolinkUploadAction"/>
+                    <action id="apidocx.ApifoxUploadAction" class="io.apidocx.handle.apifox.ApifoxUploadAction"/>
+                    <action id="apidocx.ShowdocUploadAction" class="io.apidocx.handle.showdoc.ShowdocUploadAction"/>
+                    <action id="apidocx.ExportToMarkdownAction" class="io.apidocx.handle.markdown.ExportToMarkdownAction"/>
+                    <action id="apidocx.ExportToOpenApiAction" class="io.apidocx.handle.openapi.ExportToOpenApiAction"/>
+                    <action id="apidocx.CopyAsCurlAction" class="io.apidocx.handle.curl.CopyAsCurlAction"/>
+                    <action id="apidocx.CopyAsMarkdownAction" class="io.apidocx.handle.markdown.CopyAsMarkdownAction"/>
+                    <action id="apidocx.OpenSettings" class="io.apidocx.action.OpenSettingsAction"/>
+                </group>-->
     </actions>
 
     <change-notes><![CDATA[

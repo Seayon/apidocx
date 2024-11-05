@@ -247,23 +247,35 @@ public class RequestParser {
         paramsProperty.setType(DataTypes.ARRAY);
         paramsProperty.setRequired(true);
 
-        // 构建params数组的items属性
-        Property paramsItemProperty = new Property();
-        paramsItemProperty.setType(DataTypes.OBJECT);
-
-        // 解析方法参数
-        Map<String, Property> paramProperties = new LinkedHashMap<>();
-        for (PsiParameter parameter : methodParameters) {
+        // 如果只有一个参数，直接使用该参数的类型作为数组项的类型
+        if (methodParameters.size() == 1) {
+            PsiParameter parameter = methodParameters.get(0);
             Property paramProperty = kernelParser.parse(parameter.getType());
             paramProperty.setRequired(parameter.getAnnotation(JavaConstants.NotNull) != null);
             String description = paramTags.get(parameter.getName());
             if (StringUtils.isNotEmpty(description)) {
                 paramProperty.setDescription(description);
             }
-            paramProperties.put(parameter.getName(), paramProperty);
+            paramsProperty.setItems(paramProperty);
+        } else {
+            // 构建params数组的items属性
+            Property paramsItemProperty = new Property();
+            paramsItemProperty.setType(DataTypes.OBJECT);
+
+            // 解析方法参数
+            Map<String, Property> paramProperties = new LinkedHashMap<>();
+            for (PsiParameter parameter : methodParameters) {
+                Property paramProperty = kernelParser.parse(parameter.getType());
+                paramProperty.setRequired(parameter.getAnnotation(JavaConstants.NotNull) != null);
+                String description = paramTags.get(parameter.getName());
+                if (StringUtils.isNotEmpty(description)) {
+                    paramProperty.setDescription(description);
+                }
+                paramProperties.put(parameter.getName(), paramProperty);
+            }
+            paramsItemProperty.setProperties(paramProperties);
+            paramsProperty.setItems(paramsItemProperty);
         }
-        paramsItemProperty.setProperties(paramProperties);
-        paramsProperty.setItems(paramsItemProperty);
 
         jsonRpcProperty.addProperty("params", paramsProperty);
         return jsonRpcProperty;
