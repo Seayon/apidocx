@@ -21,6 +21,7 @@ import io.apidocx.model.HttpMethod;
 import io.apidocx.model.ParameterIn;
 import io.apidocx.model.Property;
 import io.apidocx.model.RequestBodyType;
+import io.apidocx.parse.constant.JavaConstants;
 import io.apidocx.parse.constant.SpringConstants;
 import io.apidocx.parse.model.Jsr303Info;
 import io.apidocx.parse.model.RequestInfo;
@@ -84,6 +85,16 @@ public class RequestParser {
         } else if (!requestBody.isEmpty()) {
             request.setRequestBody(requestBody.get(0));
         }
+        return request;
+    }
+    public RequestInfo parseJsonRpc(PsiMethod method) {
+        List<PsiParameter> parameters = filterMethodParameters(method);
+        RequestBodyType requestBodyType  = RequestBodyType.json;
+        Property requestBody = getJsonRpcRequestBody(method, parameters);
+        RequestInfo request = new RequestInfo();
+        request.setRequestBodyType(requestBodyType);
+        request.setRequestBodyForm(Collections.emptyList());
+        request.setRequestBody(requestBody);
         return request;
     }
 
@@ -196,6 +207,66 @@ public class RequestParser {
             requestParameters.removeAll(queries);
         }
         return formProperties;
+    }
+
+    /**
+     * 解析JsonRPC请求参数
+     */
+    /**
+     * 解析JsonRPC请求参数
+     */
+    private Property getJsonRpcRequestBody(PsiMethod method, List<PsiParameter> methodParameters) {
+        Map<String, String> paramTags = PsiDocCommentUtils.getTagParamTextMap(method);
+
+        // 构建最外层的JsonRPC对象
+        Property jsonRpcProperty = new Property();
+        jsonRpcProperty.setType(DataTypes.OBJECT);
+        jsonRpcProperty.setRequired(true);
+
+        // 添加标准JsonRPC字段
+        Property methodProperty = new Property();
+        methodProperty.setType(DataTypes.STRING);
+        methodProperty.setRequired(true);
+        methodProperty.setDescription("固定填写" + method.getName());
+        jsonRpcProperty.addProperty("method", methodProperty);
+
+        Property jsonrpcVersionProperty = new Property();
+        jsonrpcVersionProperty.setType(DataTypes.STRING);
+        jsonrpcVersionProperty.setRequired(true);
+        jsonrpcVersionProperty.setDescription("固定填写2.0");
+        jsonRpcProperty.addProperty("jsonrpc", jsonrpcVersionProperty);
+
+        Property idProperty = new Property();
+        idProperty.setType(DataTypes.INTEGER);
+        idProperty.setRequired(true);
+        idProperty.setDescription("请求ID");
+        jsonRpcProperty.addProperty("id", idProperty);
+
+        // 构建params数组属性
+        Property paramsProperty = new Property();
+        paramsProperty.setType(DataTypes.ARRAY);
+        paramsProperty.setRequired(true);
+
+        // 构建params数组的items属性
+        Property paramsItemProperty = new Property();
+        paramsItemProperty.setType(DataTypes.OBJECT);
+
+        // 解析方法参数
+        Map<String, Property> paramProperties = new LinkedHashMap<>();
+        for (PsiParameter parameter : methodParameters) {
+            Property paramProperty = kernelParser.parse(parameter.getType());
+            paramProperty.setRequired(parameter.getAnnotation(JavaConstants.NotNull) != null);
+            String description = paramTags.get(parameter.getName());
+            if (StringUtils.isNotEmpty(description)) {
+                paramProperty.setDescription(description);
+            }
+            paramProperties.put(parameter.getName(), paramProperty);
+        }
+        paramsItemProperty.setProperties(paramProperties);
+        paramsProperty.setItems(paramsItemProperty);
+
+        jsonRpcProperty.addProperty("params", paramsProperty);
+        return jsonRpcProperty;
     }
 
     /**

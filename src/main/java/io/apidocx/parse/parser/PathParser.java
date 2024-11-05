@@ -5,6 +5,7 @@ import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiMethod;
 import io.apidocx.model.HttpMethod;
+import io.apidocx.parse.constant.JsonRpcConstants;
 import io.apidocx.parse.constant.SpringConstants;
 import io.apidocx.parse.constant.WxbConstants;
 import io.apidocx.parse.model.PathInfo;
@@ -14,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,13 +44,18 @@ public class PathParser {
         if (requestMapping != null) {
             pathInfo = parseRequestMappingAnnotation(requestMapping);
         } else {
-            for (Entry<HttpMethod, String> entry : MAPPINGS.entrySet()) {
-                HttpMethod httpMethod = entry.getKey();
-                String mappingAnnotation = entry.getValue();
-                PsiAnnotation annotation = PsiAnnotationUtils.getAnnotation(method, mappingAnnotation);
-                if (annotation != null) {
-                    pathInfo = parseXxxMappingAnnotation(httpMethod, annotation);
-                    break;
+            PsiAnnotation jsonRpcAnnotation = PsiAnnotationUtils.getAnnotation(Objects.requireNonNull(method.getContainingClass()), JsonRpcConstants.JsonRpcService);
+            if (jsonRpcAnnotation != null) {
+                pathInfo = parseJsonRpcServiceAnnotation(HttpMethod.POST, jsonRpcAnnotation);
+            } else {
+                for (Entry<HttpMethod, String> entry : MAPPINGS.entrySet()) {
+                    HttpMethod httpMethod = entry.getKey();
+                    String mappingAnnotation = entry.getValue();
+                    PsiAnnotation annotation = PsiAnnotationUtils.getAnnotation(method, mappingAnnotation);
+                    if (annotation != null) {
+                        pathInfo = parseXxxMappingAnnotation(httpMethod, annotation);
+                        break;
+                    }
                 }
             }
         }
@@ -85,6 +92,17 @@ public class PathParser {
         info.setMethod(method);
         return info;
     }
+
+    /**
+     * JSONRPC com.googlecode.jsonrpc4j.JsonRpcService
+     */
+    private static PathInfo parseJsonRpcServiceAnnotation(HttpMethod method, PsiAnnotation annotation) {
+        PathInfo info = new PathInfo();
+        info.setPaths(getPaths(annotation));
+        info.setMethod(method);
+        return info;
+    }
+
 
     /**
      * 从注解获取方法信息

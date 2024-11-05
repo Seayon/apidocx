@@ -7,6 +7,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiMember;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiModifierList;
@@ -14,6 +15,7 @@ import com.intellij.psi.search.searches.SuperMethodsSearch;
 import com.intellij.psi.util.MethodSignatureBackedByPsiMethod;
 import io.apidocx.config.ApidocxConfig;
 import io.apidocx.model.Api;
+import io.apidocx.parse.constant.JsonRpcConstants;
 import io.apidocx.parse.constant.SpringConstants;
 import io.apidocx.parse.model.ClassApiData;
 import io.apidocx.parse.model.ClassLevelApiInfo;
@@ -30,6 +32,7 @@ import io.apidocx.parse.util.PsiAnnotationUtils;
 import io.apidocx.parse.util.PsiUtils;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -166,8 +169,20 @@ public class ApiParser {
         api.setDescription(parseHelper.getApiDescription(method));
         api.setDeprecated(parseHelper.getApiDeprecated(method));
         api.setTags(parseHelper.getApiTags(method));
-        // 请求信息
-        RequestInfo requestInfo = requestParser.parse(method, path.getMethod());
+        // 是否是JsonRPC服务
+        boolean isJsonRpcService = Optional
+                .of(method)
+                .map(PsiMember::getContainingClass)
+                .map(c -> c.getAnnotation(JsonRpcConstants.JsonRpcService))
+                .isPresent();
+        RequestInfo requestInfo = null;
+        if (!isJsonRpcService) {
+            // 请求信息
+            requestInfo = requestParser.parse(method, path.getMethod());
+        }
+        if (isJsonRpcService) {
+            requestInfo = requestParser.parseJsonRpc(method);
+        }
         api.setParameters(requestInfo.getParameters());
         api.setRequestBodyType(requestInfo.getRequestBodyType());
         api.setRequestBody(requestInfo.getRequestBody());
