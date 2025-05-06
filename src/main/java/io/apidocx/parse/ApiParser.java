@@ -169,20 +169,11 @@ public class ApiParser {
         api.setDescription(parseHelper.getApiDescription(method));
         api.setDeprecated(parseHelper.getApiDeprecated(method));
         api.setTags(parseHelper.getApiTags(method));
-        // 是否是JsonRPC服务
-        boolean isJsonRpcService = Optional
-                .of(method)
-                .map(PsiMember::getContainingClass)
-                .map(c -> c.getAnnotation(JsonRpcConstants.JsonRpcService))
-                .isPresent();
-        RequestInfo requestInfo = null;
-        if (!isJsonRpcService) {
-            // 请求信息
-            requestInfo = requestParser.parse(method, path.getMethod());
-        }
-        if (isJsonRpcService) {
-            requestInfo = requestParser.parseJsonRpc(method);
-        }
+        
+        // 请求信息
+        RequestInfo requestInfo = isJsonRpcService(method)
+                ? requestParser.parseJsonRpc(method)
+                : requestParser.parse(method, path.getMethod());
         api.setParameters(requestInfo.getParameters());
         api.setRequestBodyType(requestInfo.getRequestBodyType());
         api.setRequestBody(requestInfo.getRequestBody());
@@ -196,6 +187,11 @@ public class ApiParser {
      * 判断是否是控制类或接口
      */
     private boolean isParseTargetPsiClass(PsiClass psiClass) {
+        // 检查是否是 JSON-RPC 服务
+        if (PsiAnnotationUtils.getAnnotation(psiClass, JsonRpcConstants.JsonRpcService) != null) {
+            return true;
+        }
+        
         // 接口是为了满足接口继承的情况
         boolean isController = psiClass.isInterface()
                 || PsiAnnotationUtils.getAnnotation(psiClass, SpringConstants.RestController) != null
@@ -218,6 +214,19 @@ public class ApiParser {
             }
         }
         return isController;
+    }
+    
+    /**
+     * 判断方法所在类是否是 JSON-RPC 服务
+     *
+     * @param method 方法对象
+     * @return 是否是 JSON-RPC 服务
+     */
+    private boolean isJsonRpcService(PsiMethod method) {
+        return Optional.ofNullable(method)
+                .map(PsiMember::getContainingClass)
+                .map(c -> c.getAnnotation(JsonRpcConstants.JsonRpcService))
+                .isPresent();
     }
 
     /**

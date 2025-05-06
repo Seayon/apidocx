@@ -22,6 +22,7 @@ import io.apidocx.model.ParameterIn;
 import io.apidocx.model.Property;
 import io.apidocx.model.RequestBodyType;
 import io.apidocx.parse.constant.JavaConstants;
+import io.apidocx.parse.constant.JsonRpcConstants;
 import io.apidocx.parse.constant.SpringConstants;
 import io.apidocx.parse.model.Jsr303Info;
 import io.apidocx.parse.model.RequestInfo;
@@ -87,14 +88,18 @@ public class RequestParser {
         }
         return request;
     }
+    /**
+     * 解析 JSON-RPC 请求
+     *
+     * @param method 方法对象
+     * @return 请求信息
+     */
     public RequestInfo parseJsonRpc(PsiMethod method) {
         List<PsiParameter> parameters = filterMethodParameters(method);
-        RequestBodyType requestBodyType  = RequestBodyType.json;
-        Property requestBody = getJsonRpcRequestBody(method, parameters);
         RequestInfo request = new RequestInfo();
-        request.setRequestBodyType(requestBodyType);
+        request.setRequestBodyType(RequestBodyType.json);
+        request.setRequestBody(buildJsonRpcRequestBody(method, parameters));
         request.setRequestBodyForm(Collections.emptyList());
-        request.setRequestBody(requestBody);
         return request;
     }
 
@@ -210,75 +215,111 @@ public class RequestParser {
     }
 
     /**
-     * 解析JsonRPC请求参数
+     * 构建 JSON-RPC 请求体
+     *
+     * @param method 方法对象
+     * @param methodParameters 方法参数列表
+     * @return JSON-RPC 请求体属性
      */
-    /**
-     * 解析JsonRPC请求参数
-     */
-    private Property getJsonRpcRequestBody(PsiMethod method, List<PsiParameter> methodParameters) {
+    private Property buildJsonRpcRequestBody(PsiMethod method, List<PsiParameter> methodParameters) {
         Map<String, String> paramTags = PsiDocCommentUtils.getTagParamTextMap(method);
 
-        // 构建最外层的JsonRPC对象
+        // 构建最外层的 JSON-RPC 对象
         Property jsonRpcProperty = new Property();
         jsonRpcProperty.setType(DataTypes.OBJECT);
         jsonRpcProperty.setRequired(true);
+        jsonRpcProperty.setDescription("JSON-RPC 2.0 请求对象");
 
-        // 添加标准JsonRPC字段
+        // 添加标准 JSON-RPC 字段
+        addJsonRpcStandardFields(jsonRpcProperty, method);
+        
+        // 构建 params 数组属性
+        jsonRpcProperty.addProperty("params", buildJsonRpcParams(methodParameters, paramTags));
+        
+        return jsonRpcProperty;
+    }
+    
+    /**
+     * 添加 JSON-RPC 标准字段
+     *
+     * @param jsonRpcProperty JSON-RPC 属性对象
+     * @param method 方法对象
+     */
+    private void addJsonRpcStandardFields(Property jsonRpcProperty, PsiMethod method) {
+        // method 字段
         Property methodProperty = new Property();
         methodProperty.setType(DataTypes.STRING);
         methodProperty.setRequired(true);
-        methodProperty.setDescription("固定填写" + method.getName());
+        methodProperty.setDescription("JSON-RPC 方法名，固定填写 " + method.getName());
         jsonRpcProperty.addProperty("method", methodProperty);
 
+        // jsonrpc 字段
         Property jsonrpcVersionProperty = new Property();
         jsonrpcVersionProperty.setType(DataTypes.STRING);
         jsonrpcVersionProperty.setRequired(true);
-        jsonrpcVersionProperty.setDescription("固定填写2.0");
+        jsonrpcVersionProperty.setDescription("JSON-RPC 协议版本，固定填写 " + JsonRpcConstants.VERSION);
         jsonRpcProperty.addProperty("jsonrpc", jsonrpcVersionProperty);
 
+        // id 字段
         Property idProperty = new Property();
         idProperty.setType(DataTypes.INTEGER);
         idProperty.setRequired(true);
-        idProperty.setDescription("请求ID");
+        idProperty.setDescription("请求 ID，用于匹配请求和响应");
         jsonRpcProperty.addProperty("id", idProperty);
-
-        // 构建params数组属性
+    }
+    
+    /**
+     * 构建 JSON-RPC params 参数数组
+     *
+     * @param methodParameters 方法参数列表
+     * @param paramTags 参数注释映射
+     * @return params 数组属性
+     */
+    private Property buildJsonRpcParams(List<PsiParameter> methodParameters, Map<String, String> paramTags) {
         Property paramsProperty = new Property();
         paramsProperty.setType(DataTypes.ARRAY);
         paramsProperty.setRequired(true);
+        paramsProperty.setDescription("JSON-RPC 参数数组");
 
-        // 如果只有一个参数，直接使用该参数的类型作为数组项的类型
-        if (methodParameters.size() == 1) {
+        if (methodParameters.isEmpty()) {
+            // 无参数情况
+            return paramsProperty;
+        } else if (methodParameters.size() == 1) {
+            // 单参数情况，直接使用该参数的类型作为数组项
             PsiParameter parameter = methodParameters.get(0);
             Property paramProperty = kernelParser.parse(parameter.getType());
             paramProperty.setRequired(parameter.getAnnotation(JavaConstants.NotNull) != null);
+            
             String description = paramTags.get(parameter.getName());
             if (StringUtils.isNotEmpty(description)) {
                 paramProperty.setDescription(description);
             }
+            
             paramsProperty.setItems(paramProperty);
         } else {
-            // 构建params数组的items属性
+            // 多参数情况，将所有参数封装在一个对象中
             Property paramsItemProperty = new Property();
             paramsItemProperty.setType(DataTypes.OBJECT);
+            paramsItemProperty.setDescription("参数对象");
 
-            // 解析方法参数
             Map<String, Property> paramProperties = new LinkedHashMap<>();
             for (PsiParameter parameter : methodParameters) {
                 Property paramProperty = kernelParser.parse(parameter.getType());
                 paramProperty.setRequired(parameter.getAnnotation(JavaConstants.NotNull) != null);
+                
                 String description = paramTags.get(parameter.getName());
                 if (StringUtils.isNotEmpty(description)) {
                     paramProperty.setDescription(description);
                 }
+                
                 paramProperties.put(parameter.getName(), paramProperty);
             }
+            
             paramsItemProperty.setProperties(paramProperties);
             paramsProperty.setItems(paramsItemProperty);
         }
-
-        jsonRpcProperty.addProperty("params", paramsProperty);
-        return jsonRpcProperty;
+        
+        return paramsProperty;
     }
 
     /**

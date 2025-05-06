@@ -94,18 +94,29 @@ public class PathParser {
     }
 
     /**
-     * JSONRPC com.googlecode.jsonrpc4j.JsonRpcService
+     * 解析 JSON-RPC 服务注解
+     *
+     * <p>JSON-RPC 服务使用 {@code com.googlecode.jsonrpc4j.JsonRpcService} 注解标记，
+     * 该方法将解析注解中的路径信息，并将方法名添加到路径后面，格式为 {@code path#methodName}。</p>
+     *
+     * @param method HTTP 方法，通常为 POST
+     * @param annotation JSON-RPC 服务注解
+     * @param psiMethod 方法对象
+     * @return 路径信息
      */
     private static PathInfo parseJsonRpcServiceAnnotation(HttpMethod method, PsiAnnotation annotation, PsiMethod psiMethod) {
         PathInfo info = new PathInfo();
         List<String> paths = getPaths(annotation);
+        
         if (paths != null && !paths.isEmpty()) {
-            String s = paths.get(0);
-            if (!s.isEmpty()) {
-                s = s + "#" + psiMethod.getName();
-            }
-            paths.set(0, s);
+            String basePath = paths.get(0);
+            // 使用 # 分隔符连接基础路径和方法名，便于在 API 文档中区分不同的 JSON-RPC 方法
+            String fullPath = StringUtils.isEmpty(basePath)
+                    ? psiMethod.getName()
+                    : basePath + "#" + psiMethod.getName();
+            paths.set(0, fullPath);
         }
+        
         info.setPaths(paths);
         info.setMethod(method);
         return info;
