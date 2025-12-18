@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>yapix</id>
+    <id>apidocx-jsonrpc</id>
     <name>Apidocx</name>
     <vendor url="https://github.com/jetplugins">Jetplugins</vendor>
 
