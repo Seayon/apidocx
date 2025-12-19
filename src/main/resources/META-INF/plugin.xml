@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>apidocx-jsonrpc</id>
-    <name>Apidocx</name>
+    <name>Apidocx-Jsonrpc</name>
     <vendor url="https://github.com/jetplugins">Jetplugins</vendor>
 
     <description><![CDATA[
