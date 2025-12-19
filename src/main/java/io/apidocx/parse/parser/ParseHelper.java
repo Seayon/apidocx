@@ -230,16 +230,16 @@ public class ParseHelper {
     public String getFieldDescription(PsiField field, List<Value> values) {
         // 优先级: @ApiModelProperty > 文档注释标记@description >  文档注释第一行
         String summary = PsiSwaggerUtils.getFieldDescription(field);
-
-        PsiDocComment comment = field.getDocComment();
-        if (comment != null) {
-            if (StringUtils.isEmpty(summary)) {
-                summary = Arrays.stream(comment.getDescriptionElements())
-                        .filter(o -> o instanceof PsiDocToken)
-                        .map(PsiElement::getText)
-                        .findFirst()
-                        .map(String::trim)
-                        .orElse(null);
+        if (StringUtils.isEmpty(summary)) {
+            String docTitle = PsiDocCommentUtils.getDocCommentTitle(field);
+            String docDescription = PsiDocCommentUtils.getDocCommentDescription(field);
+            summary = docTitle;
+            if (StringUtils.isNotEmpty(docDescription)) {
+                if (StringUtils.isEmpty(summary)) {
+                    summary = docDescription;
+                } else {
+                    summary = summary + "\n" + docDescription;
+                }
             }
         }
 

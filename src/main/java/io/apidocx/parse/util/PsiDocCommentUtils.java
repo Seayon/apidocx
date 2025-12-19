@@ -123,7 +123,7 @@ public class PsiDocCommentUtils {
                     .map(PsiElement::getText)
                     .map(String::trim)
                     .filter(text -> !"<p>".equals(text))
-                    .collect(Collectors.joining());
+                    .collect(Collectors.joining("\n"));
         }
         return null;
     }

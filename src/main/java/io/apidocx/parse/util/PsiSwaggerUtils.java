@@ -7,6 +7,7 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
 import io.apidocx.parse.constant.SwaggerConstants;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Swagger解析相关工具
@@ -65,7 +66,15 @@ public class PsiSwaggerUtils {
     public static String getFieldDescription(PsiField psiField) {
         PsiAnnotation apiModelProperty = PsiAnnotationUtils.getAnnotation(psiField, SwaggerConstants.ApiModelProperty);
         if (apiModelProperty != null) {
-            return PsiAnnotationUtils.getStringAttributeValueByAnnotation(apiModelProperty);
+            String value = PsiAnnotationUtils.getStringAttributeValueByAnnotation(apiModelProperty);
+            String notes = PsiAnnotationUtils.getStringAttributeValueByAnnotation(apiModelProperty, "notes");
+            if (StringUtils.isBlank(notes)) {
+                return StringUtils.trimToNull(value);
+            }
+            if (StringUtils.isBlank(value)) {
+                return StringUtils.trimToNull(notes);
+            }
+            return value + "\n" + notes;
         }
         PsiAnnotation schema = PsiAnnotationUtils.getAnnotation(psiField, SwaggerConstants.Schema);
         if (schema != null) {
