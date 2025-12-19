@@ -37,11 +37,11 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Copy Api as Markdown for LLMs (包含源码)
  */
-public class CopyMarkdownForLlmAction extends AbstractAction {
+public class CopyApiAsMarkdownForLlmsAction extends AbstractAction {
 
     public static final String ACTION_TEXT = "Copy Api as Markdown for LLMs";
 
-    public CopyMarkdownForLlmAction() {
+    public CopyApiAsMarkdownForLlmsAction() {
         super(false);
     }
 

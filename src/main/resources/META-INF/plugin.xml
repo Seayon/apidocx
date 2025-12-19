@@ -57,7 +57,7 @@
             <add-to-group group-id="EditorLangPopupMenu" anchor="first"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt u"/>
         </action>
-        <action id="apidocx.CopyMarkdownForLlmStandaloneAction" class="io.apidocx.handle.markdown.CopyMarkdownForLlmAction">
+        <action id="apidocx.CopyApiAsMarkdownForLlmsStandaloneAction" class="io.apidocx.handle.markdown.CopyApiAsMarkdownForLlmsAction">
             <add-to-group group-id="EditorLangPopupMenu" anchor="after" relative-to-action="apidocx.MainAction"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </action>
@@ -73,7 +73,7 @@
             <action id="apidocx.ExportToOpenApiAction" class="io.apidocx.handle.openapi.ExportToOpenApiAction"/>
             <action id="apidocx.CopyAsCurlAction" class="io.apidocx.handle.curl.CopyAsCurlAction"/>
             <action id="apidocx.CopyAsMarkdownAction" class="io.apidocx.handle.markdown.CopyAsMarkdownAction"/>
-            <action id="apidocx.CopyMarkdownForLlmAction" class="io.apidocx.handle.markdown.CopyMarkdownForLlmAction"/>
+            <action id="apidocx.CopyApiAsMarkdownForLlmsAction" class="io.apidocx.handle.markdown.CopyApiAsMarkdownForLlmsAction"/>
             <action id="apidocx.OpenSettings" class="io.apidocx.action.OpenSettingsAction"/>
         </group>
     </actions>
