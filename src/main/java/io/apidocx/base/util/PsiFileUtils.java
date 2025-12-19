@@ -46,11 +46,19 @@ public class PsiFileUtils {
     public static List<PsiClass> getPsiClassByFile(List<PsiJavaFile> psiJavaFiles) {
         List<PsiClass> psiClassList = Lists.newArrayListWithCapacity(psiJavaFiles.size());
         for (PsiJavaFile psiJavaFile : psiJavaFiles) {
-            Arrays.stream(psiJavaFile.getClasses())
+            PsiClass[] classes = psiJavaFile.getClasses();
+            // 优先取 public class（兼容旧逻辑），否则取 public interface（JSON-RPC 服务常用接口定义）
+            Arrays.stream(classes)
                     .filter(o -> !o.isInterface()
                             && o.getModifierList() != null
                             && o.getModifierList().hasModifierProperty(PsiModifier.PUBLIC))
-                    .findFirst().ifPresent(psiClassList::add);
+                    .findFirst()
+                    .or(() -> Arrays.stream(classes)
+                            .filter(o -> o.isInterface()
+                                    && o.getModifierList() != null
+                                    && o.getModifierList().hasModifierProperty(PsiModifier.PUBLIC))
+                            .findFirst())
+                    .ifPresent(psiClassList::add);
         }
         return psiClassList;
     }

@@ -117,6 +117,16 @@ public class ApidocxConfig {
      */
     private String timeFormat;
 
+    /**
+     * Copy Api as Markdown for LLMs: 服务地址（可选）
+     */
+    private String llmServiceEndpoint;
+
+    /**
+     * Copy Api as Markdown for LLMs: Maven 依赖片段（可选，建议填完整 dependency XML）
+     */
+    private String llmMavenDependency;
+
     private static final Pattern BEANS_PATTERN = Pattern.compile("^beans\\[(.+)]$");
 
     @Data
@@ -168,6 +178,8 @@ public class ApidocxConfig {
         String dateFormat = properties.getProperty("dateFormat", "");
         String timeFormat = properties.getProperty("timeFormat", "");
         String requestBodyParamType = properties.getProperty("requestBodyParamType", "");
+        String llmServiceEndpoint = properties.getProperty("llmServiceEndpoint", "");
+        String llmMavenDependency = properties.getProperty("llmMavenDependency", "");
 
         ApidocxConfig config = new ApidocxConfig();
         if (StringUtils.isNotEmpty(strict)) {
@@ -188,6 +200,8 @@ public class ApidocxConfig {
         config.dateTimeFormatJson = dateTimeFormatJson;
         config.dateFormat = dateFormat;
         config.timeFormat = timeFormat;
+        config.llmServiceEndpoint = llmServiceEndpoint;
+        config.llmMavenDependency = llmMavenDependency;
         if (StringUtils.isNotEmpty(requestBodyParamType)) {
             config.requestBodyParamType = new RequestBodyParamType(requestBodyParamType);
         }
@@ -241,6 +255,8 @@ public class ApidocxConfig {
         config.setDateTimeFormatJson(settings.getDateTimeFormatJson());
         config.setDateFormat(settings.getDateFormat());
         config.setTimeFormat(settings.getTimeFormat());
+        config.setLlmServiceEndpoint(settings.getLlmServiceEndpoint());
+        config.setLlmMavenDependency(settings.getLlmMavenDependency());
         config.setRequestBodyParamType(settings.getRequestBodyParamType());
 
         // 时间格式
@@ -255,6 +271,12 @@ public class ApidocxConfig {
         }
         if (StringUtils.isBlank(settings.getTimeFormat())) {
             config.setTimeFormat(internal.getTimeFormat());
+        }
+        if (StringUtils.isBlank(settings.getLlmServiceEndpoint())) {
+            config.setLlmServiceEndpoint(internal.getLlmServiceEndpoint());
+        }
+        if (StringUtils.isBlank(settings.getLlmMavenDependency())) {
+            config.setLlmMavenDependency(internal.getLlmMavenDependency());
         }
 
         // 解包装类型

@@ -342,7 +342,7 @@ public abstract class AbstractAction extends AnAction {
          * 是否应当继续解析处理
          */
         public boolean shouldHandle() {
-            return project != null && module != null && (selectedJavaFiles != null || selectedClass != null);
+            return project != null && module != null && (selectedJavaFiles != null || selectedClass != null || selectedMethod != null);
         }
 
         /**

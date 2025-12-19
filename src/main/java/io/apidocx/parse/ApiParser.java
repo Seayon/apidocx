@@ -121,6 +121,7 @@ public class ApiParser {
      */
     private MethodApiData doParseMethod(PsiMethod method, ClassLevelApiInfo classLevelInfo) {
         MethodApiData data = new MethodApiData();
+        data.setMethod(method);
 
         // 1.该方法是否被跳过
         if (parseHelper.isMethodIgnored(method)) {
