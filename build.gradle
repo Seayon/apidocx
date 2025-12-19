@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.github.jetplugins'
-version '1.1.10-jsonrpc-3'
+version '1.1.10-jsonrpc-4'
 
 java.sourceCompatibility = 1.8
 java.targetCompatibility = 1.8
