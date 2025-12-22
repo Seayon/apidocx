@@ -158,13 +158,8 @@ public class LlmMarkdownGenerator {
     }
 
     private void appendTypeDefinition(StringBuilder sb, PsiClass type) {
-        String qn = StringUtils.defaultIfBlank(type.getQualifiedName(), type.getName());
-        sb.append("#### ").append(code(qn)).append("\n\n");
-
-        VirtualFile vf = Optional.ofNullable(type.getContainingFile()).map(PsiFile::getVirtualFile).orElse(null);
-        if (vf != null) {
-            sb.append("源码位置: ").append(code(vf.getPath())).append("\n\n");
-        }
+        String name = StringUtils.defaultIfBlank(type.getName(), type.getQualifiedName());
+        sb.append("#### ").append(code(name)).append("\n\n");
 
         sb.append("```java").append("\n");
         sb.append(type.getText()).append("\n");
