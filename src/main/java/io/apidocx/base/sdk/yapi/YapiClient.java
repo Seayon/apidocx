@@ -12,6 +12,7 @@ import io.apidocx.base.sdk.yapi.model.LoginWay;
 import io.apidocx.base.sdk.yapi.model.TestResult;
 import io.apidocx.base.sdk.yapi.model.TestResult.Code;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -178,6 +179,9 @@ public class YapiClient {
                     boolean isLogin = YapiConstants.isLoginPath(template.path());
                     if (!isLogin) {
                         if (StringUtils.isNotEmpty(this.token)) {
+                            // Feign reuses the same request template across retries. Remove the
+                            // previous value first so every retry carries exactly one token.
+                            template.query("token", Collections.emptyList());
                             template.query("token", this.token);
                         } else {
                             template.header("Cookie", getOrRefreshAccessToken(false));
